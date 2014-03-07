@@ -78,6 +78,7 @@ class MenuItem extends KnpMenuItem
      * Child items
      *
      * @ORM\OneToMany(targetEntity="MenuItem", mappedBy="parent", cascade={"all"}, indexBy="name")
+     * @ORM\OrderBy({"position"="ASC"})
      */
     protected $children;
 
@@ -89,6 +90,11 @@ class MenuItem extends KnpMenuItem
      */
     protected $parent = null;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    protected $position = 1;
+    
     /**
      * @ORM\Column(type="datetime")
      */
@@ -358,6 +364,18 @@ class MenuItem extends KnpMenuItem
         return $this;
     }
 
+    public function setPosition($pos) 
+    {
+        $this->position = $pos; 
+        
+        return $this;
+    }
+
+    public function getPosition() 
+    {
+        return $this->position;    
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -405,7 +423,13 @@ class MenuItem extends KnpMenuItem
         }
 
         $child->setParent($this);
-
+        
+        $lastPos = 0;
+        
+        if(is_object($lastChild = $this->getLastChild()))
+            $lastPos = $lastChild->getPosition();
+        
+        $child->setPosition($lastPos + 1);
         $this->children->set($child->getName(), $child);
 
         return $child;
@@ -479,13 +503,15 @@ class MenuItem extends KnpMenuItem
         }
 
         $newChildren = array();
-
+        $cnter = 0;
+        
         foreach ($order as $name) {
             if (!$this->children->containsKey($name)) {
                 throw new \InvalidArgumentException('Cannot find children named ' . $name);
             }
 
             $child = $this->getChild($name);
+            $child->setPosition(++$cnter);
             $newChildren[$name] = $child;
         }
 
