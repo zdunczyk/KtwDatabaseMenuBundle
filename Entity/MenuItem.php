@@ -77,7 +77,7 @@ class MenuItem extends KnpMenuItem
     /**
      * Child items
      *
-     * @ORM\OneToMany(targetEntity="MenuItem", mappedBy="parent", cascade={"all"})
+     * @ORM\OneToMany(targetEntity="MenuItem", mappedBy="parent", cascade={"all"}, indexBy="name")
      */
     protected $children;
 
